@@ -10,11 +10,14 @@
 const express       = require('express'        );
 const cors          = require('cors'           );
 const bodyParser    = require('body-parser'    );
+const path          = require('path'           );
+
                       require('dotenv').config()
 
 const app = express();
       app.use(cors());
       app.use(bodyParser.json());
+      app.use(express.static(path.join(__dirname, 'build')));
 
 
 //Handler functions                   
@@ -23,7 +26,6 @@ const nl            = require('./handlers/newsletter.js');
 const auth          = require('./handlers/auth.js'      );
 const emails        = require('./handlers/emails.js'    );
 const portfolio     = require('./handlers/portfolio.js' );
-
 
 
 
@@ -71,7 +73,10 @@ app.post('/newCategory',         portfolio.newCategory     ); // creates new cat
 app.post('/deleteCategory',      portfolio.deleteCategory  ); // deletes category from portfolio
 
 
-
+//serves react app
+app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    });
 
 
 
