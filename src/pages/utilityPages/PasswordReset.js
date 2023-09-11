@@ -38,7 +38,7 @@ export default function PasswordReset ({setAuthenticated, newStatus}) {
         // otherwise, update the status message and send the password and token to the server.
         newStatus( setPasswordStatus, 'Storing new password. You should be redirected shortly...')
 
-        Axios.post(`${process.env.REACT_APP_API_BASE_URL}resetPassword`,  [password, token]     )
+        Axios.post(`${process.env.REACT_APP_API_URL}resetPassword`,  [password, token]     )
              .then( res => {
                                 // if the server returns an error message, update the status message.
                                 if (res.data === 'invalid token'  ||

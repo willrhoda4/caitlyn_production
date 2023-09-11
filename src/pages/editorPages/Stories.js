@@ -104,7 +104,7 @@ export default function Stories ({newStatus}) {
   
 
   // all-terrain data getter
-  const getData = (reqBody) => Axios.post('http://localhost:3000/getData', reqBody);
+  const getData = (reqBody) => Axios.post(`${process.env.REACT_APP_API_URL}getData`, reqBody);
 
 
   // load data from database
@@ -167,10 +167,10 @@ export default function Stories ({newStatus}) {
     const newRank = data[data.findIndex(type => type.category_name === category)].stories.length+1;
 
 
-    Axios.post('http://localhost:3000/addData', [     category, 
-                                                      [  'headline', 'story_url', 'image_url', 'image_alt', 'date', 'rank'    ], 
-                                                      [[  headline,   url,         image,       alt,         date,   newRank  ]]
-                                                   ])
+    Axios.post(`${process.env.REACT_APP_API_URL}addData`, [       category, 
+                                                              [  'headline', 'story_url', 'image_url', 'image_alt', 'date', 'rank'    ], 
+                                                              [[  headline,   url,         image,       alt,         date,   newRank  ]]
+                                                          ])
          .then(  res => { newStoryStatus('Story successfully saved!'); loadData()} )
          .catch( err =>   newStoryStatus(`There was an error: ${err}`)             )
 

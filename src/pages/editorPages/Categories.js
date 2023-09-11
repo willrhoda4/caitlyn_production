@@ -31,7 +31,7 @@ export default function Categories ({newStatus}) {
     const loadData = useCallback(() => {
 
         
-        Axios.post('http://localhost:3000/getData',   [ 'categories', null, { orderBy: 'rank' } ] )
+        Axios.post(`${process.env.REACT_APP_API_URL}getData`,   [ 'categories', null, { orderBy: 'rank' } ] )
         .then(   res =>   setCategoryData(res.data)                                               )
         .catch(  err =>   console.log(err)                                                        );
         
@@ -126,7 +126,7 @@ export default function Categories ({newStatus}) {
         // identify user-created tables in the database.
         const categoryCapitalized = newCategory[0].toUpperCase() + newCategory.slice(1);
 
-        Axios.post('http://localhost:3000/newCategory', [  categoryCapitalized, newRank ])
+        Axios.post(`${process.env.REACT_APP_API_URL}newCategory`, [  categoryCapitalized, newRank ])
              .then(   res => { 
                                setAddAttempted(false);
                                loadData()       

@@ -73,7 +73,7 @@ export default function Unsubscribe({newStatus}) {
 
 
         // send the request.
-        Axios.put('http://localhost:3000/updateData', reqBody      )
+        Axios.put(`${process.env.REACT_APP_API_URL}updateData`, reqBody      )
             .then(  res => {    
                                 // update the status message and toggle unsubscribed.
                                 newStatus(setStatus, confirmation);

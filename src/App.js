@@ -78,12 +78,14 @@ function App() {
   
   <>
   
-  <Helmet>
-    <title>Caitlyn Gowriluk - journalist</title>
-    <meta name="description" content="Caitlyn Gowriluk is a Canadian digital journalist working as an online reporter for CBC Manitoba." />
-    <link rel="canonical"    href="https://www.caitlyngowriluk.com/" />
-    <link rel="alternate"    href="https://www.caitlyngowriluk.ca/" hreflang="en-ca" />
-  </Helmet>
+    <Helmet>
+
+      <title>Caitlyn Gowriluk - journalist</title>
+      <meta name="description" content="Caitlyn Gowriluk is a Canadian digital journalist working as an online reporter for CBC Manitoba." />
+      <link rel="canonical"    href="https://www.caitlyngowriluk.com/" />
+      <link rel="alternate"    href="https://www.caitlyngowriluk.ca/" hreflang="en-ca" />
+
+    </Helmet>
 
     <div       id='app' 
         className={`
@@ -93,11 +95,15 @@ function App() {
     >
 
       <ErrorBoundary>
+
         <Routes>
+
           <Route path='/'                element={<Portfolio         newStatus={newStatus}  />}  />  
           <Route path='/copyeditor'      element={<Editor            newStatus={newStatus}  />}  />
           <Route path='/unsubscribe'     element={<Unsubscribe       newStatus={newStatus}  />}  />
+        
         </Routes>
+        
       </ErrorBoundary>
 
     </div>

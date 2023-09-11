@@ -68,7 +68,7 @@ export default function Awards () {
     // updates the database whenver awardsDisplayed changes.
     const getDisplayStatus = useCallback(() => {
 
-      Axios.put(`${process.env.REACT_APP_API_BASE_URL}updateData`, [    'misc',
+      Axios.put(`${process.env.REACT_APP_API_URL}updateData`, [    'misc',
                                                                        [ 'active' ],
                                                                        [ awardsDisplayed ],
                                                                        [[ 'description', 'awards_displayed' ]]
@@ -84,7 +84,7 @@ export default function Awards () {
   // category, then sets state via awardGear.
   const loadData = useCallback(() => {
 
-    Axios.post('http://localhost:3000/getData',  [ 'awards', null, { orderBy: 'rank' } ]                                      )
+    Axios.post(`${process.env.REACT_APP_API_URL}getData`,  [ 'awards', null, { orderBy: 'rank' } ]                                      )
          .then(  res => awardGear.forEach( (type, index) => type[2](res.data.filter(award => award.category === type[0] ) ) ) )
         .catch(  err => console.log(err)                                                                                      );
 
@@ -109,7 +109,7 @@ export default function Awards () {
 
     // adds the new award to the database,
     // then reloads the data.
-    Axios.post('http://localhost:3000/addData', [    'awards', 
+    Axios.post(`${process.env.REACT_APP_API_URL}addData`, [    'awards', 
                                                    [  'award', 'institution', 'date', 'category', 'rank'    ], 
                                                    [[  award,   institution,   date,   category,   newRank  ]]
                                                 ])

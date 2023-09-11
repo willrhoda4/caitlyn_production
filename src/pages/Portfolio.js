@@ -56,7 +56,7 @@ export default function Portfolio ({newStatus}) {
 
 
     // getData is a helper function that makes a post request to the server.
-    const getData = (reqBody) => Axios.post('http://localhost:3000/getData', reqBody);
+    const getData = (reqBody) => Axios.post(`${process.env.REACT_APP_API_URL}getData`, reqBody);
 
     // category data is the biggest hassle.
     getData([ 'categories', null, { orderBy: 'rank' } ] )

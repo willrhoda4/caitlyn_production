@@ -33,7 +33,7 @@ export default function Login ({setAuthenticated, newStatus}) {
 
         newStatus(setPasswordStatus, 'verifying password...')
 
-        Axios.post(`${process.env.REACT_APP_API_BASE_URL}checkPassword`,  [password]    )
+        Axios.post(`${process.env.REACT_APP_API_URL}checkPassword`,  [password]    )
             .then( res => {
                                 res.data === 'match' ? setAuthenticated(true)
                                                      : newStatus(   setPasswordStatus,  
@@ -49,7 +49,7 @@ export default function Login ({setAuthenticated, newStatus}) {
 
         newStatus(setPasswordStatus, 'generating reset link...')
 
-        Axios.post(`${process.env.REACT_APP_API_BASE_URL}resetLink`                    )
+        Axios.post(`${process.env.REACT_APP_API_URL}resetLink`                    )
             .then( res => newStatus(setPasswordStatus, 'Reset link delivered!', 4000)  )
            .catch( err => newStatus(setPasswordStatus,  err.message,            4000)  );
 

@@ -37,7 +37,7 @@ export default function Profile ({newStatus}) {
     // and only update the database if the new state is different.
     useEffect(() => {
 
-        Axios.post(`${process.env.REACT_APP_API_BASE_URL}getData`, [      'misc', 
+        Axios.post(`${process.env.REACT_APP_API_URL}getData`, [      'misc', 
                                                                      [  [ 'description', 'construction','or' ],
                                                                         [ 'description', 'admin_email'       ] 
                                                                      ] 
@@ -68,7 +68,7 @@ export default function Profile ({newStatus}) {
 
         else {
 
-            Axios.put(`${process.env.REACT_APP_API_BASE_URL}updateData`, [     'misc',
+            Axios.put(`${process.env.REACT_APP_API_URL}updateData`, [     'misc',
                                                                             [  'value'  ], 
                                                                             [   email   ], 
                                                                             [ ['description', 'admin_email'] ]
@@ -95,7 +95,7 @@ export default function Profile ({newStatus}) {
 
         if (window.confirm(warning)) {
 
-            Axios.put(`${process.env.REACT_APP_API_BASE_URL}updateData`, [      'misc', 
+            Axios.put(`${process.env.REACT_APP_API_URL}updateData`, [      'misc', 
                                                                             [   'active'         ], 
                                                                             [    newConstruction ], 
                                                                             [ [ 'description', 'construction' ] ] 

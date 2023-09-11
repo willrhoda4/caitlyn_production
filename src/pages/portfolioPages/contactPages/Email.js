@@ -64,12 +64,12 @@ export default function Email ({newStatus}) {
         else                 {        newStatus( setMessageStatus, `Delivering message...`  );                                                           
         
     
-            Axios.post('http://localhost:3000/email', {
-                                                            type:   'userEmail',
-                                                            name:    name,
-                                                            email:   email,
-                                                            message: message
-                                                    }
+            Axios.post(`${process.env.REACT_APP_API_URL}email`, {
+                                                                        type:   'userEmail',
+                                                                        name:    name,
+                                                                        email:   email,
+                                                                        message: message
+                                                                }
                     )
                 .then(  res => {    
                                     // if the message was successfully sent, display a success message and clear the form. 

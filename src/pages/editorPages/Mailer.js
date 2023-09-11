@@ -50,7 +50,7 @@ export default function Mailer ({newStatus}) {
         // requests to our Django microservice and our Node.js server.
         const requests =    [
                                 Axios.get( `${process.env.REACT_APP_STORY_SCRAPER}getNewStories/`   ),
-                                Axios.post(`${process.env.REACT_APP_API_BASE_URL}getData`, 
+                                Axios.post(`${process.env.REACT_APP_API_URL}getData`, 
                                 
                                                                         [  'archive', 
                                                                             undefined, 
@@ -107,7 +107,7 @@ export default function Mailer ({newStatus}) {
                                               );  
 
                 // send new stories to the database.
-                Axios.post(`${process.env.REACT_APP_API_BASE_URL}addData`, ['archive', columns, newData] )
+                Axios.post(`${process.env.REACT_APP_API_URL}addData`, ['archive', columns, newData] )
                      .then( res => newStatus( setStatus, 'database successfully updated' )               )
                     .catch( err => newStatus( setStatus, 'there was an error updating the database' )    );
             } 

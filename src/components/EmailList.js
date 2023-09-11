@@ -34,9 +34,9 @@ export default function EmailList ({emailList, setEmailList, styles, newStatus, 
     // run this function on inital page load and store data in emailList.
     function getEmailList () {
 
-        return   Axios.get( 'http://localhost:3000/getEmailList'    )
-                     .then( res => setEmailList(res.data)           )
-                    .catch( err => console.log(err.message)         );
+        return   Axios.get( `${process.env.REACT_APP_API_URL}getEmailList`    )
+                     .then( res => setEmailList(res.data)                     )
+                    .catch( err => console.log(err.message)                   );
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,7 +56,7 @@ export default function EmailList ({emailList, setEmailList, styles, newStatus, 
             
             if (window.confirm(warning)) {
 
-                return  Axios.post('http://localhost:3000/deleteData',   ['emails', 'email', email.email])
+                return  Axios.post(`${process.env.REACT_APP_API_URL}deleteData`,   ['emails', 'email', email.email] )
                              .then( res => {
                                                 newStatus( setStatus, 'email successfully deleted' );
                                                 getEmailList();

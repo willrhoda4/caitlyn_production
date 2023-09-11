@@ -140,9 +140,9 @@ export default function EditorButtons ({    id,
 
             let reqBody =  [ table, pkName, id, rank, rank-1 ];
                     
-            Axios.post( 'http://localhost:3000/reRankData',  reqBody   )  
-                 .then(  res => loadData()                             )
-                .catch(  err => console.log(err)                       );  
+            Axios.post( `${process.env.REACT_APP_API_URL}reRankData`,  reqBody   )  
+                 .then(  res => loadData()                                       )
+                .catch(  err => console.log(err)                                 );  
   
         } else {
 
@@ -166,9 +166,9 @@ export default function EditorButtons ({    id,
 
             let reqBody =  [ table, pkName, id, rank, rank+1 ];
                     
-            Axios.post( 'http://localhost:3000/reRankData',  reqBody   )  
-                 .then(  res => loadData()                             )
-                .catch(  err => console.log(err)                       );  
+            Axios.post( `${process.env.REACT_APP_API_URL}reRankData`,  reqBody   )  
+                 .then(  res => loadData()                                       )
+                .catch(  err => console.log(err)                                 );  
   
         } else {
 

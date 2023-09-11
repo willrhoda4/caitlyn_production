@@ -66,9 +66,9 @@ export default function EmailStoryPreview ({state, setState, data, index, newsle
                         ];
 
         // send the request.
-        Axios.put('http://localhost:3000/updateData', reqBody       )
-            .then(  res => newStatus( setStatus, 'story updated!')  )
-           .catch(  err => console.log(err)                         );
+        Axios.put(`${process.env.REACT_APP_API_URL}updateData`  , reqBody       )
+            .then(  res => newStatus( setStatus, 'story updated!')              )
+           .catch(  err => console.log(err)                                     );
     }
 
 

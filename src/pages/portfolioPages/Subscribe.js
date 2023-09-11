@@ -66,7 +66,7 @@ export default function Subscribe ({newStatus}) {
         newStatus(setStatus, 'registering email...', undefined, null)
 
 
-        return Axios.post('http://localhost:3000/subscribe',    [email] )
+        return Axios.post(`${process.env.REACT_APP_API_URL}subscribe`,    [email] )
                     .then( res =>   {      
                                             newStatus(setStatus, res.data);
                                     } )
