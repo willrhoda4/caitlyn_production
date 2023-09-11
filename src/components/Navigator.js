@@ -16,8 +16,9 @@ import iconMenu         from '../images/icon_menu.svg';
 
 
 
-
-export default function Navigator ({currentPage, pageChange, sampleNames}) {
+// Navigator is the navigation bar that appears at the bottom of the portfolio.
+// it's 10vh tall and wall-to-wall width, but it basically comprises a simple menu.
+export default function Navigator ({currentPage, pageChange, sampleNames, awardsDisplayed}) {
 
   
     const [ animation,      setAnimation      ] = useState(false);
@@ -27,7 +28,7 @@ export default function Navigator ({currentPage, pageChange, sampleNames}) {
     
     const   menuRef                             = useRef(null);
 
-    const   pageCount                           = sampleNames.length + 4;
+    let     pageCount                           = sampleNames.length + 4;
 
 
 
@@ -36,7 +37,7 @@ export default function Navigator ({currentPage, pageChange, sampleNames}) {
     function clickLeft  () { currentPage !== 0              && pageChange(currentPage-1)  };
     function clickRight () { currentPage !== pageCount      && pageChange(currentPage+1)  };
     function clickMenu  () { !menuDisplayed                  ? setAnimation('open') 
-                                                             : setAnimation('close');         };
+                                                             : setAnimation('close');     };
     
 
 
@@ -125,13 +126,18 @@ export default function Navigator ({currentPage, pageChange, sampleNames}) {
                             )
         }
 
+        // list of links created dynamically depending on sampleNames array.
         const pages = [].concat(    [ 'Front Page',
-                                      'Bio'          ],
+                                      'Bio'           ],
                                        sampleNames,
-                                    [ 'Awards',
-                                      'Contact' ,     
-                                      'Subscribe'    ]  
+                                     [ 'Contact' ,     
+                                       'Subscribe'    ]  
                                )
+
+        // if awardsDisplayed, insert 'Awards' before 'Contact'
+        // if it isn't, then we've got one less page to count.
+        awardsDisplayed     ?   pages.splice(pages.length-2, 0, 'Awards')
+                            :   pageCount--;
 
         return pages.map((page, index) => menuLink(page, index));
     }

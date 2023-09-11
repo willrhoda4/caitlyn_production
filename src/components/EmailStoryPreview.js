@@ -13,13 +13,14 @@ import { useState,
 import   Axios          from 'axios';
 
 
+// component for editing stories in the newsletter builder.
+export default function EmailStoryPreview ({state, setState, data, index, newsletterLength, loadData, newStatus}) {
 
-export default function EmailStoryPreview ({data, index, newsletterLength, loadData}) {
 
-
-
+    // destructure the data object.
+    // put editable data in state.
     const   articleId                                   =          data.article_id;
-    const   rank                                        =          data.rank;
+    const   rank                                        =          data.index;
 
     const [ headline,            setHeadline          ] = useState(data.headline);
     const [ link,                setLink              ] = useState(data.link);
@@ -31,9 +32,9 @@ export default function EmailStoryPreview ({data, index, newsletterLength, loadD
     const [ imageUrlError,       setImageUrlError     ] = useState(false);
     const [ descriptionError,    setDescriptionError  ] = useState(false);
 
-    const [ updateStatus,        setUpdateStatus      ] = useState(false);
+    const [ status,              setStatus            ] = useState(false);
 
-
+    // error handling for the input fields.
     useEffect(() => { setHeadlineError(headline.length === 0);       }, [headline]);
     
     useEffect(() => { setLinkError(!(new URL(link).host));           }, [link]);
@@ -43,24 +44,30 @@ export default function EmailStoryPreview ({data, index, newsletterLength, loadD
     useEffect(() => { setDescriptionError(description.length === 0); }, [description]);
 
 
-
+    // update the story in the database.
     function updateStoryInfo () {
 
+        // if something's wrong, call it off.
+        // update your status to say so.
         if (    headlineError       ||
                 imageUrlError       ||
                 linkError           ||
-                descriptionError    ){  return setUpdateStatus('make sure that your urls are valid and no fields are blank');  }
+                descriptionError    ){  return newStatus( setStatus, 'make sure that your urls are valid and no fields are blank');  }
       
-        setUpdateStatus('updating story...')
+        // otherwise, update the status and get started.
+        newStatus( setStatus, 'updating story...', undefined, false)
 
+        // make a request body.
         const reqBody = [
-                              'archive',
-                            [ 'headline',  'link', 'image',  'description'   ],
-                            [  headline,    link,   imageUrl, description    ],
-                            [ 'article_id', articleId                        ]
+                               'archive',
+                            [  'headline',  'link',     'image',  'description'   ],
+                            [   headline,    link,       imageUrl, description    ],
+                            [ ['article_id', articleId ]                          ]
                         ];
+
+        // send the request.
         Axios.put('http://localhost:3000/updateData', reqBody       )
-            .then(  res => setUpdateStatus('story updated!')        )
+            .then(  res => newStatus( setStatus, 'story updated!')  )
            .catch(  err => console.log(err)                         );
     }
 
@@ -69,8 +76,8 @@ export default function EmailStoryPreview ({data, index, newsletterLength, loadD
     return (
         
         <form className='
-                        w-[80%] max-w-[600px]
-                        m-4 p-4
+                        w-full max-w-[600px]
+                        mb-8 px-4 py-8
                         rounded-lg 
                         border border-gray-300 
                         bg-white
@@ -80,9 +87,9 @@ export default function EmailStoryPreview ({data, index, newsletterLength, loadD
             <img className='h-[30vh] w-auto mx-auto'
                      alt={data.description}
                      src={data.image}
-                />
+            />
 
-             <Input 
+            <Input 
                 type='text'
                 name='headline' 
                 state={headline}
@@ -90,7 +97,7 @@ export default function EmailStoryPreview ({data, index, newsletterLength, loadD
                 error={headlineError}
             />
 
-             <Input 
+            <Input 
                 type='text'
                 name='link' 
                 state={link}
@@ -98,7 +105,7 @@ export default function EmailStoryPreview ({data, index, newsletterLength, loadD
                 error={linkError}
             />
 
-             <Input 
+            <Input 
                 type='text'
                 name='imageUrl' 
                 state={imageUrl}
@@ -106,9 +113,7 @@ export default function EmailStoryPreview ({data, index, newsletterLength, loadD
                 error={imageUrlError}
             />
 
-        
-
-             <Input 
+            <Input 
                 type='textArea'
                 name='description' 
                 state={description}
@@ -127,13 +132,15 @@ export default function EmailStoryPreview ({data, index, newsletterLength, loadD
                                 id={articleId} 
                               rank={rank} 
                              index={index}
-                             table={'next_email'}
+                             table={'next_newsletter'}
+                             state={state}
                             pkName={'article_id'}
                           loadData={loadData}
                           dataSize={newsletterLength}
+                          setState={setState}
                     /> 
 
-                <p className='px-4'>{updateStatus}</p>
+                <p id='statusGraf' className='px-4'>{status}</p>
             </div>
 
         </form>

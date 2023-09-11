@@ -3,15 +3,17 @@
 
 
 
-import iconMessenger  from '../../../images/icon_messenger.svg';
+import iconMessenger  from '../../../images/icon_signal.svg';
 import iconSecureDrop from '../../../images/icon_securedrop.svg';
-import iconShield     from '../../../images/icon_shield.svg';
+import iconTor        from '../../../images/icon_tor.svg';
 
 
 
-
+// contact component offering secure communication options.
 export default function Secure () {
 
+
+    // returns a div containing an icon, a link, and a blurb.
     function option (name, image, url, blurb) {
 
         return (
@@ -38,6 +40,8 @@ export default function Secure () {
         )
     }
 
+
+    // get your blurbs ready
     const introBlurb      = `Sharing a sensitive story can be a serious risk for sources. If you’re considering contacting me with confidential information, here’s some options to help protect your anonymity.`
 
     const signalBlurb     = `From a safe number, send me an encrypted message through Signal at 555-555-5555.`
@@ -51,25 +55,25 @@ export default function Secure () {
     return (
         <div className='h-full w-full
                         flex flex-col
-                        justify-around
+                        justify-around border
                        '
         >
 
-            <p className='h-fit w-full
+            <p className='h-fit w-full max-w-[800px]
                           px-10
                           font-serif text-xl  leading-7
                           flex flex-col justify-between
                          '
             >{introBlurb}</p>
 
-            <div className='h-fit w-full
+            <div className='h-fit w-full max-w-[800px]
                             flex flex-col 
                             items-center justify-around
                            '
             >
                 { option('signal',     iconMessenger,   'https://signal.org/en/',            signalBlurb        ) }
                 { option('securedrop', iconSecureDrop,  'https://www.cbc.ca/securedrop/',    securedropBlurb    ) }
-                { option('shield',     iconShield,      'https://www.torproject.org/',       torTailsBlurb      ) }
+                { option('shield',     iconTor,         'https://www.torproject.org/',       torTailsBlurb      ) }
             </div>
 
         </div>

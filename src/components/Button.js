@@ -3,10 +3,12 @@
 
 
 
-
-export default function Button ({name, onClick}) {
+// simple button component.
+// basically a home for the tailwind classes.
+export default function Button ({name, onClick, id}) {
 
     return <button 
+            id={id}
             type='button'
             onClick={onClick}
             className='

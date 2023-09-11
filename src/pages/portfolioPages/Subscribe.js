@@ -4,63 +4,107 @@
 
 
 
-import Input from "../../components/Input.js";
-import Button from "../../components/Button.js";
-
-import { useState, useEffect } from 'react';
-import   Axios                 from "axios";
 
 
+import   Input           from "../../components/Input.js";
+import   Button          from "../../components/Button.js";
+
+import { useState, 
+         useEffect   }   from 'react';
+import   Axios           from "axios";
 
 
+
+// simple page to allow users to subscribe to the newsletter.
 export default function Subscribe ({newStatus}) {
 
-    const [ email,          setEmail        ] = useState('');
-    const [ emailError,     setEmailError   ] = useState(false);
-    const [ status,         setStatus       ] = useState(false);
+    const [ email,          setEmail          ] = useState('');
+    const [ emailError,     setEmailError     ] = useState(false);
+    const [ errorDisplayed, setErrorDisplayed ] = useState(false);
+    const [ status,         setStatus         ] = useState(false);
 
-    useEffect(() =>   { setEmailError(!(/\S+@\S+\.\S+/.test(email))); }, [email]    );
 
+    // error-handling effect for input.
+    useEffect(() => { setEmailError(!(/\S+@\S+\.\S+/.test(email))); }, [email])
+
+
+
+    // adds event listener to email field to submit form when you smash the enter key
+    useEffect(() => {
+
+        let emailField = document.getElementById('emailInput');
+        let submitBtn  = document.getElementById('submitButton');
+     
+        if (emailField) {    
+
+            const handleKeyPress = e => {
+
+                if (e.key === 'Enter') {
+
+                    e.preventDefault();
+                    submitBtn.click();
+                }
+            };
+    
+            emailField.addEventListener('keypress', handleKeyPress);
+    
+            return () => emailField.removeEventListener('keypress', handleKeyPress);
+        }
+
+    }, []);
+
+    // sends the email address to the server.
     function subscribe () {
 
-        if (emailError) { return newStatus(setStatus, 'be sure to provide a valid address...', 4000); }
+        // activate pink error border after first attempt to submit.
+        setErrorDisplayed(true);
+        
+        // if the email address is invalid, return a status message.
+        if (emailError) { return newStatus(setStatus, 'be sure to provide a valid address...'); }
 
-        newStatus(setStatus, 'registering email...')
+        // otherwise, update the status message and send the email address to the server.
+        newStatus(setStatus, 'registering email...', undefined, null)
+
 
         return Axios.post('http://localhost:3000/subscribe',    [email] )
-                    .then( res => { 
-                                        const duplicate = 'duplicate key value violates unique constraint "unique_email"';
-                                            console.log(res);
-                                         if (typeof res.data !== 'string'  ) { return newStatus(setStatus, 'successfully subscribed!', 4000);     }
-                                    else if (       res.data === duplicate ) { return newStatus(setStatus, 'you\'re already subscribed!', 4000);  }
-                                    else {                                     return newStatus(setStatus, `ran into this problem: ${res.data}`); }  
-
-                                  } )
-                    .catch( err => newStatus(setStatus, err.message) );
+                    .then( res =>   {      
+                                            newStatus(setStatus, res.data);
+                                    } )
+                    .catch( err =>  {
+                                            const message = err.response.data ? err.response.data : err.message;
+                                            newStatus(setStatus, message);
+                                    } );
     }
 
+    const copy1 = `Join my email list.`
+    
+    const copy2 = `I send out monthly roundups of my stories, and I'll never share your address.`
 
 
     return (
     
         <div className={`h-full w-full
                          flex flex-col justify-center items-center
-                        `}
+                       `}
         >
-            <p>Want to stay current with my stories? Subscribe to monthly roundups of my writing. I'll never share your email address.</p>
+            <p className={`px-4 text-center`}>{copy1}</p>
+            <p className={`px-4 text-center`}>{copy2}</p>
 
-            <Input 
+            <Input
+                id='emailInput'
                 type='text' 
                 state={email}
                 setter={setEmail}
-                error={emailError}
+                error={emailError && errorDisplayed}
+                wrapStyle={'w-[90%] max-w-[500px]'}
             />
 
             <Button
+                id='submitButton'
                 name='sign me up'
                 onClick={subscribe}
             />
-            {status}
+            <p id='statusGraf' className='h-8'>{status}</p>
 
         </div>
     )

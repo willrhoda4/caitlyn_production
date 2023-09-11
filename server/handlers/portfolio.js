@@ -4,119 +4,18 @@
 
 
 
-const { spawn } = require('child_process');
 
 const db        = require('./database.js');
 
 
-const Pool = require('pg').Pool
-
-
-const pool = new Pool({
-                        user: 'postgres',
-                        host: 'localhost',
-                        database: 'caitlyn',
-                        password: 'rootUser',
-                        port: 5432
-                     })
 
 
 
 
-// function atomicQuery (request, response, queries, parameters, successMsg) { console.log('GOT THIS => ',queries, parameters);
-
-
-//     let steps = 0;
-
-
-//     function step (err, client, release) {
-
-//         let index = steps;
-//         let gear  = parameters[index] ? [ queries[index], parameters[index] ] 
-//                                       : [ queries[index]                    ];
-
-//         if (steps !== queries.length) {
-
-//             steps++;
-
-//             client.query(...gear, (err, res) => {
-
-//                 if (err) { return client.query('ROLLBACK', () => {   release(); 
-//                                                                      console.error(`Error executing query ${steps}`, err.stack);
-//                                                                      response.status(400).send(err.stack)
-//                                                                  })
-//                          }
-                
-//                 else     {  console.log(res.data);  
-//                             step(err, client, release);
-//                          }
-//             })
-
-//         } else {
-
-//             client.query('COMMIT', (err, res) => {
-            
-//                 if (err) { return client.query('ROLLBACK', () =>    {   release();
-//                                                                         console.error('Error committing transaction', err.stack);
-//                                                                         response.status(400).send(err.stack)
-//                                                                     })
-//                          }
-
-//                 else     {
-//                             release();
-//                             console.log('Transaction completed successfully');
-//                             response.send(successMsg);
-//                          }
-//             })
-//         }
-//     }
-
-//     pool.connect((err, client, release) => {
-
-//         if (err) { return console.error('Error acquiring client', err.stack) }
-
-//         client.query('BEGIN', (err, res) => {
-
-//             if (err) { return console.error('Error starting transaction', err.stack) }
-
-//             step(err, client, release);
-//         })
-//     }) 
-
-// }
 
 
 
-
-function getArticle (request, response) {
-
-    const getArticle = spawn('python3', ['../../caitlyn_py/getArticle.py', request.body[0]]);
-    let   articleData = '';
-    
-    console.log('getting Article...', request.body[0]);
-    
-    getArticle.stdout.on('data', function (data) {
-
-        console.log(`Pipe data from python script => ${data} ${typeof(data)}, ${data.keys}`);
-
-        articleData += data.toString();
-    })
-
-    getArticle.on('close', (code) => {
-        
-        console.log(articleData);
-
-        if (!articleData) { response.status(400).send('There was a problem retrieving your info.'); }
-        else              { articleData  = JSON.parse(articleData.replace(/'/g, '"')
-                                                                 .replace( /\*\*\*/g, "''" ));
-                            response.send(articleData);
-                          }        
-    })
-}
-
-
-
-
+// creates a new category and adds it to the database.
 function newCategory (request, response) {
 
     console.log('nu category coming...');
@@ -143,13 +42,14 @@ function newCategory (request, response) {
                                 response,
                                 [ query1,       query2 ],
                                 [ parameters,          ],
+                                [],
                                 'new category added!!'
                          );
 }
 
 
 
-
+// deletes a category and removes it from the database.
 function deleteCategory (request, response) {
 
     console.log('preparing to delete category...');
@@ -165,6 +65,7 @@ function deleteCategory (request, response) {
                                 response,
                                 [   query1,     query2 ],
                                 [ [ category ]         ],
+                                [],
                                 'category deleted!!'
                          );
 }
@@ -176,7 +77,6 @@ function deleteCategory (request, response) {
 
   
 module.exports =    { 
-                        getArticle,  
                         newCategory,
                         deleteCategory,
                     };

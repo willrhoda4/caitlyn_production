@@ -5,21 +5,12 @@
 
 
 const nodemailer    = require('nodemailer');
-const Pool          = require('pg').Pool
-
-
-// const pool = new Pool({
-//                         user: 'postgres',
-//                         host: 'localhost',
-//                         database: 'caitlyn',
-//                         password: 'rootUser',
-//                         port: 5432
-//                      })
+const db           = require('./database.js');
 
 
 
 
-
+// helper function to deliver an email via nodemailer.
 async function deliverEmail (   response, 
                                 options, 
                                 successMsg, 
@@ -28,6 +19,8 @@ async function deliverEmail (   response,
                                 cleanUpError
                             ) {
 
+
+    // create a transporter object using the website's gmail account.
     const transporter = nodemailer.createTransport({
 
         host: 'smtp.gmail.com',
@@ -39,8 +32,14 @@ async function deliverEmail (   response,
                 }
     });
 
+    
     return new Promise((resolve, reject) => {
 
+
+        // send the email.
+        // whether the email is sent successfully or not, log the result.
+        // if a cleanUp function is provided, run it, else send a response.
+        // resolve or reject the promise.
         transporter.sendMail(options, (err, info) => {
 
             if (err) {  console.error(`\n${errorMsg}\n${err.message}`);
@@ -62,15 +61,18 @@ async function deliverEmail (   response,
 
 
 
-
+// generates the newsletter.
 function newsletter (request, response) {   
     
-
-
-    if (!response.locals.emailData) { return console.log('no email data'); }
+    const stories    = request.body[0];
+    const emails     = request.body[1];
+    const publishing = request.originalUrl === '/newsletterPublish'
 
     console.log('preparing newsletter...', );
 
+
+    // generates the markup for the newsletter.
+    // strory elements are created dynamically.
     const emailMarkup = (id, token) => {
                  
         return `
@@ -138,35 +140,42 @@ function newsletter (request, response) {
                         </head>
                         <body>
                             <h1>This Month From Caitlyn Gowriluk</h1>
+
                             <table class="card-container">
-                                ${response.locals.emailData.map(story =>  `
-                                                                            <a href="${story.link}">
-                                                                                <tr class="card">
-                                                                                    <table>
-                                                                                        <tr>
-                                                                                            <img alt="${story.headline}" src="${story.image}">   
-                                                                                        </tr>
-                                                                                        <tr>
-                                                                                            <h3 style="margin: 0;">${story.headline}</h3>
-                                                                                        </tr>
-                                                                                        <tr>
-                                                                                            <p style="margin: 0;">${story.description}</p>
-                                                                                        </tr>
-                                                                                    <table>
-                                                                                </tr>
-                                                                            </a>
-                                                                        `
+                                ${stories.map(story =>  `
+                                                            <a href="${story.link}">
+                                                                <tr class="card">
+                                                                    <table>
+                                                                        <tr>
+                                                                            <img alt="${story.headline}" src="${story.image}">   
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <h3 style="margin: 0;">${story.headline}</h3>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <p style="margin: 0;">${story.description}</p>
+                                                                        </tr>
+                                                                    <table>
+                                                                </tr>
+                                                            </a>
+                                                        `
                                 ).join('')}
                             </table>
-                            ${ request.originalUrl === '/publishNewsletter' ? `<a href="${process.env.URL}/unsubscribe?id=${id}&token=${token}">Unsubscribe</a>` 
-                                                                            : `<a href="${process.env.URL}/newsletter">Edit</a> | <a href="${process.env.URL}/publish">Publish</a>` 
+
+                            ${ !publishing ? '<p>Preview</p>'
+                                           : `<a href="${process.env.URL}/unsubscribe?id=${id}&token=${token}">
+                                                <p>Unsubscribe/<p>
+                                              </a>`
                              }
                         </body>
                     </html>
                 `};
                             
     
-    if (request.originalUrl !== '/publishNewsletter')    {
+
+    // if the request is not to publish the newsletter, 
+    // send a preview to the website's email.
+    if (!publishing)    {
 
         const mailOptions =  {
             from:     process.env.EMAIL,
@@ -175,34 +184,32 @@ function newsletter (request, response) {
             html:     emailMarkup()
         };
 
+
+
         deliverEmail(   response, 
                         mailOptions, 
-                        'Draft delivered.'
+                        'Draft delivered.',
+                        'Error delivering draft.'
                     );
-
-
-        // transporter.sendMail(mailOptions, (error, info) => {
-
-        //     if (error) { console.log(error);                    
-        //                } 
-        //     else       { console.log('Email sent: ' + info.response); 
-        //                  response.send('revised draft delivered');
-        //                }
-        // })
     }
                     
+    // otherwise, send the newsletter to all subscribers.
     else {
 
 
+        const sendEmails = async () => {        console.log('function ran');    console.log(emails);    
 
-        const sendEmails = async (response) => {
-
+            // counts the number of emails sent and errors encountered.
+            // errorCount + readerCount should equal the number of emails in the list.
             let errorCount  = 0;
             let readerCount = 0;
 
-            for (let i = 0; i < response.locals.emailList.length; i++) {
+            // send the email to each email address in the list.
+            // if there's an error, increment the errorCount.
+            // if there's no error, increment the readerCount.
+            for (let i = 0; i < emails.length; i++) {      console.log('loop run');
 
-                const email = response.locals.emailList[i];
+                const email =   emails[i];
         
                 const mailOptions = {
                     from:   `"Caitlyn Gowriluk" ${process.env.EMAIL}`,
@@ -211,7 +218,7 @@ function newsletter (request, response) {
                     html:     emailMarkup(email.id, email.email_token)
                 };
         
-                try {
+                try {      console.log('sending email to ', email.email);
                         await deliverEmail(
                                             response,
                                             mailOptions,
@@ -221,64 +228,66 @@ function newsletter (request, response) {
                                             () => readerCount++,
                                             // eslint-disable-next-line no-loop-func
                                             () => errorCount++
-                                          );
+                                          );                                                     
                               } 
                 catch (error) { console.log(`Error sending email to ${email.email}: ${error}`);
                                 errorCount++;
                               }
             }
+
+            // once all emails have been sent, send a report.
             let report = `Newsletter delivered to ${readerCount} readers with ${errorCount} errors.`;
             console.log('\n',report);
             response.send(report);
+
         };
-        sendEmails(response);
+        // call the function.
+        sendEmails();
     }
 };
 
+/*
 
+// accepts a query, parameters, and a callback, then 
+// executes the query and passes the results to the callback.
+function simpleQuery(response, query, parameters, cleanUp, next) {
 
-// let errorCount = 0;
+    const gear = parameters ? [query, parameters] : [query];
 
-// const sendEmails = async (response) => {
+    pool.query(...gear, (err, res) => {
+        
+        if (err) { console.log(err.stack);
+                   response.status(400).send(err.message);
+                 } 
+        else     { cleanUp && cleanUp(res.rows, response);
+                   next     ? next() : response.send(res.rows); 
+                 }
+    });
+};
 
-//     for (const [index, email] of response.locals.emailList.entries()) {
+*/
 
-//         const mailOptions =  {
+function getAdminEmail (request, response, next) {
 
-//             from:   `"Caitlyn Gowriluk" ${process.env.EMAIL}`,
-//             to:       email.email,
-//             subject: 'This Month from Caitlyn Gowriluk',
-//             html:      emailMarkup(email.email_token)
-//         };
+    const query = `SELECT value FROM misc WHERE description = 'admin_email'`;
 
-//         try {
+    return db.simpleQuery(   response,
+                             query,
+                             undefined,
+                             res => response.locals.adminEmail = res[0].value,
+                             next
+                         );
 
-//         await deliverEmail(   response,
-//                                 mailOptions,
-//                                 `Email sent to ${email.email}.`,
-//                                 `Error sending email to ${email.email}`,
-//                                 () => index+1 !== response.locals.emailList.length && console.log('proceeding to next email...'),
-//                                 () => errorCount++
-
-//         );
-//         } catch (error) {
-
-//         console.log(`Error sending email to ${email.email}: ${error}`);
-//         errorCount++;
-
-//         }
-//     }
-//     response.send(`Newsletter delivered with ${errorCount} errors.`);
-// };
-
-// sendEmails(response);
+}
 
 
 
-
+// sends a message from the email form
+// to the website's gmail account.
 function formMail(request, response) { 
 
-    console.log('Preparing to receive message from email form...')
+    console.log('Delivering message from email form...')
+
 
     const {
             name,
@@ -288,8 +297,8 @@ function formMail(request, response) {
 
 
     const mailOptions = {       from:     email,
-                                to:       process.env.EMAIL,
-                                subject: `email from ${name}`,
+                                to:       response.locals.adminEmail,
+                                subject: `portfolio email from ${name}`,
                                 text:    `email from ${name}\nreply to ${email}\n\n${message}`
                         }
 
@@ -299,33 +308,19 @@ function formMail(request, response) {
                     `Error receiving message from ${email}`
                 );
 
-                        
-    
-    // transporter.sendMail(mailOptions, (error, info) => {
-
-    //     if (error)  {   console.error(`Error receiving message from ${email}: ${error}`);              
-    //                     return response.status(400).send('error receiving email');
-    //                 }
-    //     else        {   console.log(`Message succesfully received from ${email}. ${info.response}`); 
-    //                     return response.send('message successfully received!');
-    //                 }
-    // })
 }
 
 
 
 
 
-
+// sends a reset link to the website's gmail account.
 function sendResetLink(request, response) {
 
 
     console.log('preparing to send reset link...');
 
-    const           resetToken = crypto.randomBytes(32).toString("hex");
-    response.locals.resetToken = resetToken;
-
-    const url = `${process.env.URL}/passwordReset?token=${resetToken}`;
+    const url = `${process.env.URL}/copyeditor?token=${response.locals.resetToken}`;
 
     const resetLinkOptions = {      
                                 to:       'caitlyn.gowriluk.website@gmail.com',
@@ -340,13 +335,6 @@ function sendResetLink(request, response) {
                     `Reset link successfully sent.`, 
                     `Error resetting password.`
                 );
-
-    // transporter.sendMail(resetLinkOptions, (error, info) => {
-
-    //     if (error)  {   return console.log(`Error resetting password: ${error}`);              }
-
-    //     else        {   return console.log(`Reset link successfully sent. ${info.response}`); }
-    // })
 }
 
 
@@ -354,153 +342,9 @@ function sendResetLink(request, response) {
 module.exports={ 
                     formMail,
                     newsletter,
+                    getAdminEmail,
                     sendResetLink,
                 };
-
-
-
-
-
-
-
-
-
-
-    //========Email Route:========
-
-
-// app.post('/email', async (req, res, next) => {
-
-//     console.log(req.body);
-
-//     const { cc,
-//             name, 
-//             type,
-//             email, 
-//             phone,
-//             origin,
-//             invite, 
-//             subject, 
-//             message, 
-//             resetId  } = req.body
-
-    
-//     const transporter = nodemailer.createTransport({
-//             host:       'smtp.gmail.com',
-//             port:       465,
-//             secure:     true,
-//             auth:    { user: process.env.EMAIL, 
-//                        pass: process.env.EMAILPASS 
-//                      }
-             
-//     })
-
-
-
-
-
-
-  
-
-//     async function formMail() {    
-
-    
-
-//         const userSubject     = `Website email from ${name} subject: ${subject}`;
-//         const producerSubject = `PRODUCR MSG FROM: ${name}  subject: ${subject}`;
-//         const otherSubject    = `From Website: ${subject}`;
-  
-//         const mailOptions = {       from: email,
-//                                       to: process.env.EMAIL,
-//                                  subject: type==='userEmail' ? userSubject : type==='producerEmail' ? producerSubject : otherSubject,
-//                                     text: 
-//                             `                Name:   ${name}
-//                                             Email:   ${email}
-//                                             Phone #: ${phone}
-//                                             Subject: ${subject}
-//                                             Message: ${message}`
-//                             }
-        
-//         try           { const  result = await transporter.sendMail(mailOptions);
-//                         return result;
-//                       } 
-//         catch (error) { return error;   }
-//     }
-
-//     async function sendResetLink() {
-
-//         console.log('function ran');
-
-//         const      resetToken = crypto.randomBytes(32).toString("hex");
-//         res.locals.resetToken = resetToken;
-
-//         const url = `${process.env.URL}/passwordReset?id=${resetId}&origin=${origin}&invite=${invite}&token=${resetToken}`;
-
-//         const resetLinkOptions = {         to:  email,
-//                                          from:  `"Skene Stunts" ${process.env.EMAIL}`,
-//                                       subject: invite ? `Welcome to Skene Stunts Director's Chair` : `Password Reset`,
-//                                          text: invite ? `Join the revolution => ${url}`            : `Reset your password here => ${url}`
-//                                  } 
-        
-//         try           { const  result = await transporter.sendMail(resetLinkOptions);
-//                         return result;
-//                       } 
-//         catch (error) { return error;   }
-//     }
-
-//     async function reachOut() {
-
-//         const reachOutOptions = {   to: email,
-//                                     from: `"Skene Stunts" ${process.env.EMAIL}`,
-//                                     cc: cc,
-//                                     subject: subject,
-//                                     text: message
-//                                 }
-//         try           { const  result = await transporter.sendMail(reachOutOptions);
-//                         return result;
-//                       } 
-//         catch (error) { return error;   } 
-//     }
-
-
-
-
-
-//          if ( type === 'userEmail'  ||
-//               type === 'producerEmail' ) {  console.log('trying to mail')
-
-//             formMail().then(  (result) => {     console.log(result);
-//                                                  if ( result.response.status &&
-//                                                       result.response.status.toString().startsWith('4')) { res.status(400).send('Error 400'); }
-//                                             else if ( result.accepted                                  ) { res.status(200).send('msg sent!'); }
-//                           })
-//                      .catch( (error)  => { console.log('Email error...', error.message);  res.send(error); });     
-//     } 
-//     else if ( type === 'resetEmail'   ) {
-
-//        sendResetLink().then(  (result) => {       console.log('result came vvv\n',result)
-//                                                   if ( result.response.status &&
-//                                                        result.response.status.toString().startsWith('4')) { res.status(400).send('Error 400'); }
-//                                              else if ( result.accepted                                  ) { next();                            }
-//                           })
-//                      .catch( (error)  => { console.log('Email error...', error.message);  res.send(error); });   
-//     }
-//     else if ( type === 'reachingOut'  ) {
-//         reachOut().then(  (result) => {            if ( result.response.status &&
-//                                                         result.response.status.toString().startsWith('4')) { res.status(400).send('Error 400'); }
-//                                               else if ( result.accepted                                  ) { res.status(200).send('msg sent!'); }
-//                         })
-//                         .catch( (error)  => { console.log('Email error...', error.message);  res.send(error); });     
-//     }
-//     else  { console.log(`I guess you could call this a 'type' error...`)}
-    
-// }, db.registerReset)
-
-
-
-
-
-
 
 
 

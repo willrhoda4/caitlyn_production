@@ -15,39 +15,43 @@ import EditorButtons from '../../components/EditorButtons.js';
 
 
 
-
-export default function Categories () {
+// editor page for the categories table.
+export default function Categories ({newStatus}) {
 
     const [ categoryData,        setCategoryData      ] = useState([]);
     const [ newCategory,         setNewCategory       ] = useState('');
+    const [ addAttempted,        setAddAttempted      ] = useState(false);
+
     const [ newCategoryError,    setNewCategoryError  ] = useState(false);
     const [ newCategoryStatus,   setNewCategoryStatus ] = useState(false);
 
-    function newStatus (status) {
-
-        setNewCategoryStatus(status);
-        setTimeout(() => setNewCategoryStatus(false), 3000);
-    }
 
     
-    
+    // refreshes categoryData state with database call
     const loadData = useCallback(() => {
 
         
         Axios.post('http://localhost:3000/getData',   [ 'categories', null, { orderBy: 'rank' } ] )
-        .then(   res => { console.log(res.data); setCategoryData(res.data) }                      )
-        .catch(  err => console.log(err)                                                          );
+        .then(   res =>   setCategoryData(res.data)                                               )
+        .catch(  err =>   console.log(err)                                                        );
         
     }, [])
 
 
+    // load state on initial page load
     useEffect(() =>   { loadData()                                     }, [loadData]    );
 
+    // don't allow any nameless categories
     useEffect(() =>   { setNewCategoryError(newCategory.length === 0); }, [newCategory] );
 
 
+    // provides a simple interface for editing a category table row.
     function categorySuite (category, catIndex) {
 
+
+        // clickhandler function updates the blurb state of a category.
+        // it's necessary because all the category blurb states are stored in an array.
+        // updating database is handled by EditorButtons component.
         const changeBlurb = (state) => {
             
             const newState = categoryData.map((category, index) => { if (index !== catIndex) { return     category                 }
@@ -59,61 +63,78 @@ export default function Categories () {
             
            
         return (
-            <div key={catIndex}>
 
+            <div key={catIndex} className='w-[90%]'>
+
+                {/* text area for blurb editing */}
                 <Input 
                     type='textArea'
                     name={category.category_name} 
                     state={categoryData[catIndex].blurb}
                     setter={changeBlurb}
                     error={false}
+                    wrapStyle={'w-[90%]'}
                 />
-                   <p className={`  text-sm
-                                    transition-colors
-                                    ${ category.active ? 'text-green-300' : 'text-red-300' }
-                                 `}
-                    >{ category.active ? 'online' : 'editing' }</p>
 
-                <div className='flex'>
-
-
-                    <EditorButtons 
-                                id={category.category_id} 
-                              name={category.category_name}
-                              rank={category.rank} 
-                             index={catIndex}
-                             table={'categories'}
-                            blurbs={categoryData.map(category => category.blurb)}
-                            pkName={'category_id'}
-                            active={category.active}
-                          loadData={loadData}
-                          dataSize={categoryData.length}
-                    />
+                {/* simple indicator displays whether the category is live. */}
+                <p className={`  text-sm
+                                transition-colors
+                                ${ category.active ? 'text-green-300' : 'text-red-300' }
+                                `}
+                >{ category.active ? 'online' : 'editing' }</p>
 
 
+                {/* in addition to deleting and reranking, editor buttons for
+                    categories can trigger blurb updates and page activations/deactions */}
+                <EditorButtons 
+                        id={category.category_id} 
+                        name={category.category_name}
+                        rank={category.rank} 
+                        index={catIndex}
+                        table={'categories'}
+                        blurbs={categoryData.map(category => category.blurb)}
+                        pkName={'category_id'}
+                        active={category.active}
+                        loadData={loadData}
+                        dataSize={categoryData.length}
+                />
 
-                </div>
+
+
 
             </div>
         )
     }
 
 
-    // }
+    // simple function to create a new category.
+    // it requires a bespoke endpoint as it involves
+    // creating a new table, as well as a fresh row
+    // in the category table.
     function addCategory () {
 
-        if (newCategoryError) { return newStatus('Can\'t have a category without a name...'); }
 
+        if (newCategoryError) { 
+                                setAddAttempted(true); 
+                                return newStatus( setNewCategoryStatus, `Can't have a category without a name...`); 
+                              }
+
+        // rank is set based on the length of the categoryData array,
         const newRank = categoryData.length+1;
 
-        Axios.post('http://localhost:3000/newCategory', [  newCategory, newRank ])
-             .then(   res => { console.log('category added!'); 
+        // the category name is capitalized to help
+        // identify user-created tables in the database.
+        const categoryCapitalized = newCategory[0].toUpperCase() + newCategory.slice(1);
+
+        Axios.post('http://localhost:3000/newCategory', [  categoryCapitalized, newRank ])
+             .then(   res => { 
+                               setAddAttempted(false);
                                loadData()       
                              }
                    )
-             .catch(  err => { console.log(err);
-                               err.response.data.startsWith('error: duplicate key') ? newStatus('This category already exists')
-                                                                                    : newStatus(err.response.data);
+             .catch(  err => { 
+                               err.response.data.startsWith('error: duplicate key') ? newStatus( setNewCategoryStatus, 'This category already exists')
+                                                                                    : newStatus( setNewCategoryStatus, err.response.data);
                              }
                    );
     }
@@ -130,8 +151,8 @@ export default function Categories () {
                 name='Category' 
                 state={newCategory}
                 setter={setNewCategory}
-                error={newCategoryError}
-                wrapStyle='pl-2 w-5/6'
+                error={newCategoryError && addAttempted}
+                wrapStyle='pl-2 w-[80%]'
             />
 
             <div className='flex items-center'>
@@ -141,7 +162,7 @@ export default function Categories () {
                     onClick={addCategory}
                 />  
 
-                <p>{newCategoryStatus}</p>        
+                <p id='statusGraf'>{newCategoryStatus}</p>        
     
             </div>
 

@@ -7,18 +7,29 @@
 import SummonWord from '../../components/SummonWord.js';
 
 
-
+// front page for the portfolio.
 export default function Title({animation}) {
 
   return (
 
+    // wrapper div for the entire page.
     <div className='flex flex-col 
                     justify-center
                     h-full
                    '
     >
-        < div className={`pl-4 ${ animation === 'vanishing' && 'animate-slideOutLeft'}`}>
+        {/* wrapper for title elements.
+            it's two jobs in life are handling animation page change
+            and taking care of padding-left. */}
+        < div className={`
+                          pl-4 md:pl-6 lg:pl-8
+                          w-fit 
+                          ${ animation === 'vanishing' && 'animate-slideOutLeft'}
+                       `}
+        >
 
+            {/* the onload animation for Caitlyn Gowriluk is
+                all handled by the SummonWord component*/}
             <SummonWord 
               word='Caitlyn' 
               interval={250}
@@ -29,8 +40,9 @@ export default function Title({animation}) {
               delay={1000}
             />
 
-
-            <div className={`mt-2 w-1/2
+            {/* the onload animation for journalist is handled by
+                the animate-loadTitle class */}
+            <div className={`mt-2 w-full
                              bg-black 
                              flex justify-center
                              animate-loadTitle

@@ -3,27 +3,28 @@
 
 
 
-// const nodemailer    = require('nodemailer');
-// const crypto        = require('crypto');
-// const fs            = require('fs')
-const express       = require('express');
-const cors          = require('cors');
-const bodyParser    = require('body-parser');
+
+
+
+//Server code for caitlyngowriluk.com
+const express       = require('express'        );
+const cors          = require('cors'           );
+const bodyParser    = require('body-parser'    );
                       require('dotenv').config()
-
-
-
-                      
-const db            = require('./handlers/database.js');
-const nl            = require('./handlers/newsletter.js');
-const auth          = require('./handlers/auth.js');
-const emails        = require('./handlers/emails.js');
-const portfolio     = require('./handlers/portfolio.js');
-
 
 const app = express();
       app.use(cors());
       app.use(bodyParser.json());
+
+
+//Handler functions                   
+const db            = require('./handlers/database.js'  );
+const nl            = require('./handlers/newsletter.js');
+const auth          = require('./handlers/auth.js'      );
+const emails        = require('./handlers/emails.js'    );
+const portfolio     = require('./handlers/portfolio.js' );
+
+
 
 
 
@@ -31,47 +32,43 @@ const app = express();
 
 
 //database routes
-app.post('/getData',             db.getData                );
-app.post('/deleteData',          db.deleteData             );
-app.post('/reRankData',          db.reRankData             );
-app.post('/addData',             db.addData                );
-app.put( '/updateData',          db.updateData             )
+app.post('/getData',             db.getData                ); // gets data from database
+app.post('/deleteData',          db.deleteData             ); // deletes data from database
+app.post('/addData',             db.addData                ); // adds data to database
+app.put( '/reRankData',          db.reRankData             ); // re-ranks data in database
+app.put( '/updateData',          db.updateData             ); // updates data in database
 
 
 //auth routes
-app.post('/logPassword',         auth.logPassword          );
-app.post('/checkPassword',       auth.checkPassword        );
-app.post('/resetPassword',       auth.resetPassword        );
-app.post('/newPasswordLogin',    auth.newPasswordLogin     );
+app.post('/checkPassword',       auth.getPasswordData,
+                                 auth.checkPassword        ); // checks password for admin
+
+app.post('/resetLink',           auth.registerReset,
+                                 emails.sendResetLink      ); // sends reset link to website email
+
+app.post('/resetPassword',       auth.getTokenData,
+                                 auth.verifyTokenData,
+                                 auth.resetPassword        ); // resets password for admin
 
 
 //newsletter routes
-app.post('/generateNewsletter',  nl.getNewStories,
-                                 nl.getScheduledStories,
-                                 emails.newsletter         );
+app.post('/subscribe',           nl.subscribe              ); // handles email subscription requests
 
-app.post('/scheduledStories',    nl.getScheduledStories    );
+app.get( '/getEmailList',        nl.getEmails              ); // gets list of emails for admin
 
-app.get( '/reviseNewsletter',    nl.getScheduledStories,
-                                 emails.newsletter         );
+app.post('/newsletterPreview',   emails.newsletter         ); // sends newsletter preview to admin
 
-app.get('/publishNewsletter',    nl.getScheduledStories,
-                                 nl.getEmails,
-                                 emails.newsletter         );
-
-app.post('/subscribe',           nl.subscribe              );
-// app.post('/unsubscribe',         nl.unsubscribe            );
-app.get( '/getEmailList',        nl.getEmails              );
-
+app.post('/newsletterPublish',   emails.newsletter         ); // sends newsletter to all subscribers
 
 //email routes
-app.post('/email',               emails.formMail           );
+app.post('/email',               emails.getAdminEmail,
+                                 emails.formMail           ); // sends email from contact form to admin
                                                         
                                  
 //portfolio routes
-app.post('/newCategory',         portfolio.newCategory     );
-app.post('/deleteCategory',      portfolio.deleteCategory  );
-app.post('/getArticle',          portfolio.getArticle      );
+app.post('/newCategory',         portfolio.newCategory     ); // creates new category for portfolio
+
+app.post('/deleteCategory',      portfolio.deleteCategory  ); // deletes category from portfolio
 
 
 
@@ -81,7 +78,5 @@ app.post('/getArticle',          portfolio.getArticle      );
 
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`App listening at http://localhost:${PORT}`);
-  console.log(process.env.EMAIL);
-});
+
+app.listen(PORT, () => { console.log(`App listening at http://localhost:${PORT}`);  });

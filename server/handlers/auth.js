@@ -4,140 +4,146 @@
 
 
 
-const   bcrypt  = require('bcrypt');
-const   crypto  = require('crypto');
+const bcrypt  = require('bcrypt');
+const crypto  = require('crypto');
 
-
-
-const Pool = require('pg').Pool
-
-
-const pool = new Pool({
-                        user: 'postgres',
-                        host: 'localhost',
-                        database: 'caitlyn',
-                        password: 'rootUser',
-                        port: 5432
-                     })
+const db      = require('./database.js');
 
 
 
 
+// retrieves hashed password from database
+// and stores it in response.locals.passwordData
+// before tagging checkPassword in.
+function getPasswordData (request, response, next) {
+
+    console.log('Getting password data...');
+
+    const query     = `SELECT value FROM misc WHERE description = 'admin_pass';`;
+    const stashPass = (data) => response.locals.passwordData = data[0].value;
+
+    return db.simpleQuery( response, query, null, stashPass, next);
+}
+
+// receives a password from the client and 
+// compares it to the hashed password retrieved by getPasswordData.
+async function checkPassword (request, response) {
+
+    console.log('Checking password...');
 
 
+    const password    = request.body[0];
+    const stashedPass = response.locals.passwordData;
+    const match       = await bcrypt.compare(password, stashedPass);
 
-
-
-async function logPassword (request, response) {
-
-    let table       = request.body[0];
-    let fkKeyValue  = request.body[1];
-    let password    = request.body[2];
+    if (match) {  console.log('Passwords Match!');   response.send('match');   }   
+    else       {  console.log('Invalid Password.');  response.send('invalid'); }  
+}
     
-    let hashedPass  = await bcrypt.hash(password, 10);
-    let parameters  = [ fkKeyValue[1], hashedPass ];
-    let query       = 'INSERT INTO '+table+' ('+fkKeyValue[0]+', password) VALUES ($1, $2)';
+   
 
-    pool.query(query, parameters, (err, res) => {
-        if (err) { console.log(err.stack);  response.send(err.message)  } 
-        else     {                          response.send(res.rows)     }
-    })
 
+
+
+
+
+
+// generates an admin reset token and stores it in the database.
+// then stores the token in response.locals.resetToken
+// before tagging sendResetLink in (lives in email handlers script).
+function registerReset (request, response, next) {
+
+    const                 date = Date.now();
+    const           resetToken = crypto.randomBytes(32).toString("hex");
+    response.locals.resetToken = resetToken;
+
+    const query                = `UPDATE misc SET value = $1, date = $2 WHERE description = 'reset_token';`; console.log('')
+
+    return db.simpleQuery(   response,
+                             query,
+                           [ resetToken, date  ],
+                             null,
+                             next
+                         );
 }
 
 
 
 
 
-const checkPassword = (request, response) => {
 
-    let table          = request.body[0];
-    let pkKeyValue     = request.body[1];
-    let password       = request.body[2];
-    let query          = `SELECT * FROM `+table+` WHERE `+pkKeyValue[0]+` = $1`
+
+// retrieves the reset token from the database
+// and stores it in response.locals.tokenData
+// before tagging verifyTokenData in.
+function getTokenData (request, response, next) {
+
+    console.log('Grabbing token data...');
+
+    const query     = `SELECT value, date FROM misc WHERE description = 'reset_token';`;
+
+    function stashData (data) {
+
+        console.log(data)
+
+        response.locals.tokenData = data[0]
+
+    }
+
+    return db.simpleQuery( response, query, null, stashData, next);
+}
+
+
+// compares the reset token passed from the client
+// to the reset token retrieved by getTokenData.
+// if the tokens match, the token is valid.
+// if the token is valid, verifyTokenData tags resetPassword in.
+function verifyTokenData (request, response, next) {
+
+    console.log('Verifying validity of token...');
+
+    const passedToken  = request.body[1];
+    const stashedToken = response.locals.tokenData.value;
     
-    console.log(query); 
-    pool.query(query, [pkKeyValue[1]], async (err, res) => {
+    const generatedAt  = response.locals.tokenData.date;
+    const expiry       = Date.now() - 900000;
 
-        if (err)   { console.log(err.message); return response.status(400).send(err.message); }
-        else       { 
-            console.log('query for ',pkKeyValue[1],' => ',res.rows)
-
-            if (res.rows.length === 0) { return response.status(400).send('database error'); }
-
-            let stashedPass = res.rows[0].password; console.log('stashed pass => '+stashedPass); console.log('password => ', password);
-            
-            let match = await bcrypt.compare(password, stashedPass);
-
-            console.log('match => ', match);
-
-            if (match) {  console.log('MATCH!');   response.send('password matches');   }   
-            else       {  console.log('no match'); response.send('no match');           }  
-
-             
-        }
-    })
+         if (passedToken !== stashedToken)  { return response.send('invalid token'); }
+    else if (generatedAt  <  expiry      )  { return response.send('expired token'); }
+    else                                    { next();                                }
 }
 
 
+// end of the line after checkPassword and verifyTokenData.
+// hashes the new password and stores it in the database.
+async function resetPassword (request, response) {
 
-const registerReset = (request, response) => {
-
-    let id     = request.body.resetId;
-    let fk     = request.body.fk;
-    let table  = request.body.pwTable;
-    let token  = response.locals.resetToken;
-    let query  = `UPDATE ${table} SET token = $1, reset_at = $2 WHERE ${fk} = $3`;
-
-    pool.query(query, [ token, Date.now(), id ], (err, res) => {
-
-            if (err) { console.log(err.stack);  response.status(400).send(err.message)  } 
-            else     {                          response.send('reset re-registered')    }
-    })
-
-}
-
-const resetPassword = async (request, response) => {
-
-    console.log('resetFunction\n'+request.body);
+    console.log('Resetting password...');
     
-    let id         =  request.body[0];
-    let newPass    =  request.body[1];
-    let table      =  request.body[2];
-    let fk         =  request.body[3];
-    let hashedPass =  await bcrypt.hash(newPass, 10);
-    let query      = `UPDATE ${table} SET password = $1 WHERE ${fk} = $2`
+    const newPass    =  request.body[0];
+    const hashedPass =  await bcrypt.hash(newPass, 10);
+    const query      = `UPDATE misc SET value = $1 WHERE description = 'admin_pass';`
 
 
-    pool.query(query, [hashedPass, id], (err, res) => {
-        if (err) { console.log(err.stack);  response.send(err.message)           } 
-        else     { console.log(res);        response.send('password reset')      }
-    })
+    return db.simpleQuery(   response,
+                             query,
+                            [ hashedPass  ],
+                         );
 }
 
 
-const newPasswordLogin = (request, response) => {
 
-    let table = request.body[0];
-    let idKey = request.body[1];
-    let id    = request.body[2];
 
-    let query = `SELECT * FROM ${table} WHERE ${idKey} = $1`
-
-    pool.query(query, [id], (err, res) => {
-        if (err) { console.log(err.stack);  response.send(err.message);  } 
-        else     { console.log(res);        response.send(res.rows);     }
-    })
-}
 
 
   
 module.exports = { 
-                   logPassword,
+                   getTokenData,
                    checkPassword, 
                    registerReset,
                    resetPassword,
-                   newPasswordLogin,
+                   verifyTokenData,
+                   getPasswordData,
                 };
 
 

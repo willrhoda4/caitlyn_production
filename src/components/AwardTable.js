@@ -9,18 +9,21 @@ import EditorButtons from './EditorButtons.js';
 
 
 
-
-export default function AwardTable ({category, awardData, loadData, index}) {
+// A presentational component for the admin dashboard Awards page.
+// Renders a table of awards with options to edit and delete each award.
+// This component is used to make changes to the public-facing portfolio.
+export default function AwardTable ({ category, awardData, loadData, index }) {
 
 
     
 
 
-
+    // returns a single award preview.
     function awardPreview (award, index) {
 
 
         return (
+
             <div          key={index}
                     className='    min-h-16 h-fit w-screen
                                    pb-1
@@ -30,8 +33,11 @@ export default function AwardTable ({category, awardData, loadData, index}) {
                                    pl-4
                               '                     
             >   
+
                 <p className='font-sans truncate block'>{award.award}</p>
+
                 <p className='font-sans truncate block'>{award.institution}</p>
+
                 <EditorButtons 
                             id={award.award_id} 
                           rank={award.rank} 
@@ -43,7 +49,6 @@ export default function AwardTable ({category, awardData, loadData, index}) {
                       dataSize={awardData.length}
                 />
                
-
             </div>
         )
     }

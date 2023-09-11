@@ -6,6 +6,13 @@ module.exports = {
   theme: {
     extend: {
 
+      fontFamily: {
+
+        serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+        mono: ['Your-Mono-Font', 'monospace'],
+
+      },
+
       keyframes: {
 
         openMenu: {
