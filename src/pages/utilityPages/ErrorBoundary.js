@@ -1,5 +1,4 @@
 
-import React from 'react';
 
 
 
@@ -7,6 +6,7 @@ import React from 'react';
 
 
 
+import  React          from     'react';
 import  Construction   from     './Construction.js';
 
 
@@ -29,7 +29,7 @@ class ErrorBoundary extends React.Component {
     render() {
       // Check if an error has occurred.
       if (this.state.hasError) {
-        // If an error has occurred, render the fallback UI, which is <Construction errorBoundary={true} />.
+        // If an error has occurred, render the fallback UI.
         return <Construction errorBoundary={true} />;
       }
   
@@ -41,42 +41,4 @@ class ErrorBoundary extends React.Component {
   export default ErrorBoundary;
 
 
-
-// import  Construction   from     './Construction.js';
-
-
-// import{ useState, 
-//         useEffect }    from     'react';
-
-
-
-
-
-// export default function ErrorBoundary  ({ children }) {
-
-
-//     const [ hasError, setHasError ] = useState(false);
-
-//     useEffect(() => {
-
-//         const errorHandler = (error) => {
-
-//             console.error(error);
-//             setHasError(true);
-//         };
-
-//         window.addEventListener('error', errorHandler);
-
-//         return () => window.removeEventListener('error', errorHandler);
-
-//     }, []);
-
-
-    
-
-//     if (hasError) { return <Construction errorBoundary={true} />; }
-//     else          { return  children;                             }
-
-  
-// };
 
