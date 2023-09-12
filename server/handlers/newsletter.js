@@ -4,24 +4,11 @@
 
 
 
-const { spawn } = require('child_process');
-const   crypto  = require('crypto');
-
-
-const db        = require('./database.js');
 
 
 
-const Pool = require('pg').Pool
-
-
-const pool = new Pool({
-                        user:     'postgres',
-                        host:     'localhost',
-                        database: 'caitlyn',
-                        password: 'rootUser',
-                        port:      5432
-                     })
+const   crypto    = require('crypto');
+const {  pool  }  = require('./database.js');
 
 
 
@@ -29,6 +16,10 @@ const pool = new Pool({
 
 
 
+
+
+
+// rounds up an email list for the admin dashboard.
 function getEmails (request, response, next) {
 
 

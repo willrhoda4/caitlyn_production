@@ -387,7 +387,8 @@ const updateData = (request, response) => {
 
 
   
-module.exports = { getData, 
+module.exports = { pool,
+                   getData, 
                    addData, 
                    deleteData, 
                    reRankData,
