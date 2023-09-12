@@ -16,11 +16,12 @@ const compression   = require('compression'    );
                       require('dotenv').config()
 
 const app = express();
-      app.use(cors());
-      app.use(compression());     // sets up gzip
-      app.use(bodyParser.json());
-      app.use(express.static(path.join(__dirname, 'build')));
-      app.use((req, res, next) => {  //  vvv sets up cache control headers for static assets
+      app.use(express.json());                                       // sets up json parsing
+      app.use(cors());                                              // sets up cors
+      app.use(compression());                                      // sets up gzip
+      app.use(bodyParser.json());                                 // sets up body parsing
+      app.use(express.static(path.join(__dirname, 'build')));    // sets up static file serving
+      app.use((req, res, next) => {                             // sets up cache control headers for static assets
 
             const staticAssetExtensions = ['.js', '.css', '.jpg', '.png', '.gif', '.jpeg'];
     
