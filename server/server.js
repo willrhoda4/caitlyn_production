@@ -11,13 +11,26 @@ const express       = require('express'        );
 const cors          = require('cors'           );
 const bodyParser    = require('body-parser'    );
 const path          = require('path'           );
+const compression   = require('compression'    );
 
                       require('dotenv').config()
 
 const app = express();
       app.use(cors());
+      app.use(compression());     // sets up gzip
       app.use(bodyParser.json());
       app.use(express.static(path.join(__dirname, 'build')));
+      app.use((req, res, next) => {  //  vvv sets up cache control headers for static assets
+
+            const staticAssetExtensions = ['.js', '.css', '.jpg', '.png', '.gif', '.jpeg'];
+    
+            if (staticAssetExtensions.some(ext => req.url.endsWith(ext))) {
+              res.set('Cache-Control', 'public, max-age=86400'); // Cache for one day
+            }
+          
+            next();
+          });
+    
 
 
 //Handler functions                   
