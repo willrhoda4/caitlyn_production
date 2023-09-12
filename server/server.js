@@ -45,7 +45,8 @@ const portfolio     = require('./handlers/portfolio.js' );
 
 
 
-
+// test route
+app.get('/check',                (req, res) => res.send('checkitout!')  );
 
 //database routes
 app.post('/getData',             db.getData                ); // gets data from database
