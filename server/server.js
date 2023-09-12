@@ -20,7 +20,7 @@ const app = express();
       app.use(cors());                                              // sets up cors
       app.use(compression());                                      // sets up gzip
       app.use(bodyParser.json());                                 // sets up body parsing
-      app.use(express.static(path.join(__dirname, 'build')));    // sets up static file serving
+      app.use(express.static(path.join(__dirname, '../build')));    // sets up static file serving
       app.use((req, res, next) => {                             // sets up cache control headers for static assets
 
             const staticAssetExtensions = ['.js', '.css', '.jpg', '.png', '.gif', '.jpeg'];
