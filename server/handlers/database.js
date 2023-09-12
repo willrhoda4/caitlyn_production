@@ -6,20 +6,23 @@
 
 const Pool = require('pg').Pool
 
-//                         vvvvvv use this configuration for local development
-// const pool = new Pool({
-//                         user: 'postgres',
-//                         host: 'localhost',
-//                         database: 'caitlyn',
-//                         password: 'rootUser',
-//                         port: 5432
-//                      })
 
-// use this configuration for deployment to Heroku
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl:            { rejectUnauthorized: false }
-  });
+
+// set NODE_ENV to 'production' to activate Heroku configuration.
+// otherwise, use local configuration.
+const pool = process.env.NODE_ENV === 'production' ? new Pool({
+                                                                connectionString: process.env.DATABASE_URL,
+                                                                ssl: { rejectUnauthorized: false },
+                                                             }) 
+                                                   : new Pool({
+                                                                user: 'postgres',
+                                                                host: 'localhost',
+                                                                database: 'caitlyn',
+                                                                password: 'rootUser',
+                                                                port: 5432
+                                                             });
+
+
 
 
 
