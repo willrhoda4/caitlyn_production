@@ -83,7 +83,7 @@ export default function Portfolio ({newStatus}) {
               // then use Promise.all to wait for all promises to resolve,
               // slap the response right into state as an array of objects. 
               Promise.all( requests                         )
-                    .then( res => {   setData(res);  console.log(res)} )
+                    .then( res => {   setData(res);       } )
                    .catch( err => {   console.error(err); } );
               
               

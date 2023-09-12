@@ -26,7 +26,7 @@ export default function ErrorBoundary  ({ children }) {
 
         const errorHandler = (error) => {
 
-            console.error(error);
+            // console.error(error);   <== commented to allow Construction to render in production.
             setHasError(true);
         };
 
