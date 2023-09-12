@@ -21,7 +21,7 @@ import   iconNote               from '../images/icon_note.svg';
 
 
 // displays the email list in the admin panel.
-export default function EmailList ({emailList, setEmailList, styles, newStatus, setStatus}) {
+export default function EmailList ({emailList, setEmailList, styles, newStatus, setStatus}) {           console.log('emailList', emailList);
 
 
     const [  showTips, setShowTips  ] = useState([]);
@@ -153,7 +153,7 @@ export default function EmailList ({emailList, setEmailList, styles, newStatus, 
                             <p className={graf}>Email List</p>
                             
                             <div className={scroller}>
-                                    { emailList.length > 0 && emailList.map((email, index) => emailItem(email, index) ) }
+                                    { emailList && emailList.length > 0 && emailList.map((email, index) => emailItem(email, index) ) }
                             </div>
 
                         </div>
