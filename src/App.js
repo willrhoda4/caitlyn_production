@@ -7,6 +7,7 @@ import                        './index.css'
 import Portfolio         from './pages/Portfolio.js';
 import Editor            from './pages/Editor.js';
 import Unsubscribe       from './pages/utilityPages/Unsubsrcibe.js';
+import Fallback         from './pages/utilityPages/Fallback.js';
 import ErrorBoundary     from './pages/utilityPages/ErrorBoundary.js';
 
 import newStatus    from './components/NewStatus.js';
@@ -44,9 +45,11 @@ function App() {
 
         <Routes>
 
-          <Route path='/'                element={<Portfolio         newStatus={newStatus}  />}  />  
-          <Route path='/copyeditor'      element={<Editor            newStatus={newStatus}  />}  />
-          <Route path='/unsubscribe'     element={<Unsubscribe       newStatus={newStatus}  />}  />
+          <Route path='/'                element={<Portfolio         newStatus={newStatus}   />}  />  
+          <Route path='/copyeditor'      element={<Editor            newStatus={newStatus}   />}  />
+          <Route path='/unsubscribe'     element={<Unsubscribe       newStatus={newStatus}   />}  />
+          <Route path="*"                element={<Fallback               type={'not found'} />}  />
+
         
         </Routes>
         

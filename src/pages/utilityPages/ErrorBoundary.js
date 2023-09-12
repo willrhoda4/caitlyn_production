@@ -7,7 +7,7 @@
 
 
 import  React          from     'react';
-import  Construction   from     './Construction.js';
+import  Fallback   from     './Fallback.js';
 
 
 
@@ -30,7 +30,7 @@ class ErrorBoundary extends React.Component {
       // Check if an error has occurred.
       if (this.state.hasError) {
         // If an error has occurred, render the fallback UI.
-        return <Construction errorBoundary={true} />;
+        return <Fallback type={'error'} />;
       }
   
       // If no error has occurred, render the child components as usual.

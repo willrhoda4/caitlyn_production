@@ -18,7 +18,7 @@ import Samples          from '../pages/portfolioPages/Samples.js'
 import Qualifications   from '../pages/portfolioPages/Qualifications.js'
 import Contact          from './portfolioPages/Contact.js'
 import Subscribe        from './portfolioPages/Subscribe.js';  
-import Construction     from './utilityPages/Construction.js';
+import Fallback         from './utilityPages/Fallback.js';
 
 import Navigator       from '../components/Navigator.js';
 
@@ -181,7 +181,7 @@ export default function Portfolio ({newStatus}) {
                             />
                           </>
                         
-                        : <Construction />
+                        : <Fallback type={'construction'} />
       }
 
     </div>
