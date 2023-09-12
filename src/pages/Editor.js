@@ -36,7 +36,8 @@ export default function Editor ({newStatus}) {
 
   const token  = new URLSearchParams(window.location.search).get('token'); 
 
-  
+  if (newStatus) throw new Error('This is a test error for the error boundary.');
+
 
   return (<>
 
