@@ -73,7 +73,7 @@ export default function Awards () {
                                                                        [ awardsDisplayed ],
                                                                        [[ 'description', 'awards_displayed' ]]
                                                                     ] )
-            .then(  res => console.log(res) )
+            .then(  res => {return;}        )
             .catch( err => console.log(err) );
 
     }, [awardsDisplayed])
