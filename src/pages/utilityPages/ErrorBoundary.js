@@ -7,7 +7,7 @@
 
 
 import  React          from     'react';
-import  Fallback   from     './Fallback.js';
+import  Fallback       from     './Fallback.js';
 
 
 

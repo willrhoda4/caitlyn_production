@@ -66,7 +66,7 @@ export default function EditorButtons ({    id,
 
         const warning = `Are you sure you want to update the category blurb for ${name}?`;
         
-        window.confirm(warning) &&    Axios.put('http://localhost:3000/updateData',  [      'categories', 
+        window.confirm(warning) &&    Axios.put(`${process.env.REACT_APP_API_URL}updateData`,  [      'categories', 
                                                                                         [   'blurb'             ], 
                                                                                         [    blurbs[index]      ],
                                                                                         [ [ 'category_id', id ] ]
@@ -86,7 +86,7 @@ export default function EditorButtons ({    id,
         const warning = active ? 'Deactivating this category will make it invisible to your website visitors. Are you sure you want to take this category offline?'
                                : `Activating this category will make it immediately live on your website. Are you sure you want to proceed?`;
 
-        window.confirm(warning) && Axios.put('http://localhost:3000/updateData',         [      'categories', 
+        window.confirm(warning) && Axios.put(`${process.env.REACT_APP_API_URL}updateData`,         [      'categories', 
                                                                                             [   'active'            ], 
                                                                                             [   !active             ],
                                                                                             [ [ 'category_id', id ] ]
