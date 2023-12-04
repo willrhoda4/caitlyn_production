@@ -23,6 +23,7 @@ export default function Input ({
                                     setter, 
                                     confirm,
                                     options, 
+                                    password,
                                     wrapStyle
                                }) {
 
@@ -40,6 +41,7 @@ export default function Input ({
 
     const field      = type === 'text'       ?  <input
                                                     id={id}  
+                                                    type={password ? 'password' : 'text'}
                                                     name={name}
                                                     className={inputClass}
                                                     value={state}

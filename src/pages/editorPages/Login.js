@@ -66,7 +66,8 @@ export default function Login ({setAuthenticated, newStatus}) {
                 state={password}
                 setter={setPassword}
                 error={passwordError}
-                 wrapStyle={'w-[90%] max-w-[500px]'}
+                password={true}
+                wrapStyle={'w-[90%] max-w-[500px]'}
             />
 
             <div className='flex'>

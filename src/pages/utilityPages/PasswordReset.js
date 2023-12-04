@@ -63,6 +63,7 @@ export default function PasswordReset ({setAuthenticated, newStatus}) {
                 state={password}
                 setter={setPassword}
                 error={passwordError}
+                password={true}
             />
 
             <Button
